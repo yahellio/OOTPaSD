@@ -25,3 +25,10 @@
 *.tlog
 *.bak
 *.~*
+
+.gitattributes
+
+.vs/
+*.csproj.user
+*.csproj.*.user
+*.sln.ide

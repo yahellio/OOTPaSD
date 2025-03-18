@@ -5,8 +5,75 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:graphicEditor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Graphic Editor" Height="382" Width="934">
+    <Grid Margin="0,0,-15,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
+        <!-- Панель инструментов -->
+        <ToolBar Background="LightGray" Padding="5">
+            <!-- Выбор фигуры -->
+            <StackPanel Orientation="Horizontal">
+            <ComboBox x:Name="cbShapes" Width="120"  SelectionChanged="ShapeSelectionChanged">
+            </ComboBox>
+            </StackPanel>
+            <TextBox x:Name="tbSides" Width="50" Margin="5,0,0,0" Visibility="Collapsed" TextChanged="tbSides_TextChanged"/>
+            <!-- Кнопки действий -->
+            <Button Name="btnUndo" Content="Undo" Width="60" Click="UndoDrawing" />
+            <Button Name="btnRedo" Content="Redo" Width="60" Click="RedoDrawing"/>
+            <Button Name="btnSave" Content="Save" Width="60" />
+            <Button Name="btnLoad" Content="Load" Width="60" />
+            <Button Name="btnClear" Content="Clear" Width="60" Click="ClearDrawingArea" />
+
+            <!-- Выбор цвета обводки -->
+            <StackPanel Orientation="Horizontal" Margin="10,0">
+                <Label Content="Stroke:" VerticalAlignment="Center" />
+                <ComboBox x:Name="cbStrokeColor" Width="100" SelectionChanged="StrokeColorChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Width="20" Height="20" Fill="{Binding}" Stroke="Black" Margin="2"/>
+                                <TextBlock Text="{Binding Color}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- Выбор цвета заливки -->
+            <StackPanel Orientation="Horizontal" Margin="10,0">
+                <Label Content="Fill:" VerticalAlignment="Center" />
+                <ComboBox x:Name="cbFillColor" Width="100" SelectionChanged="FillColorChanged">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <Rectangle Width="20" Height="20" Fill="{Binding}" Stroke="Black" Margin="2"/>
+                                <TextBlock Text="{Binding Color}" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            
+            
+            <!-- Выбор толщины линии -->
+            <StackPanel Orientation="Horizontal" Margin="10,0">
+                <Label Content="Thickness:" VerticalAlignment="Center" />
+                <ComboBox x:Name="cbStrokeThickness" Width="50" SelectionChanged="StrokeThicknessChanged">
+                    <ComboBoxItem Content="1" />
+                    <ComboBoxItem Content="2" />
+                    <ComboBoxItem Content="3" />
+                    <ComboBoxItem Content="5" />
+                    <ComboBoxItem Content="10" />
+                </ComboBox>
+            </StackPanel>
+        </ToolBar>
+
+        <!-- Область рисования -->
+        <Canvas x:Name="DrawingArea" Grid.Row="1" Background="White" ClipToBounds="True"
+            MouseRightButtonDown="PolyClickPaint" PreviewMouseMove="ProcessRender" MouseLeftButtonDown="StartPaint" MouseLeftButtonUp="EndPaint">
+        </Canvas>
     </Grid>
 </Window>

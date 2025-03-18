@@ -10,6 +10,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Linq;
 using graphicEditor.Shapes;
+using System.Xml;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace graphicEditor;
 
@@ -34,9 +37,14 @@ public partial class MainWindow : Window
     private System.Windows.Shapes.Shape previewElem;
     private System.Windows.Shapes.Shape previewPolyElem;
 
+    private Stack<List<UIElement>> undoStack = new Stack<List<UIElement>>();
+    private Stack<List<UIElement>> redoStack = new Stack<List<UIElement>>();
+
     public MainWindow()
     {
         InitializeComponent();
+
+        SaveState();
 
         ShapeFactory.RegisterShape("Line", typeof(Line));
         ShapeFactory.RegisterShape("Rectangle", typeof(Rectangle));
@@ -123,7 +131,6 @@ public partial class MainWindow : Window
     }
 
 
-    
     private void StartPaint(object sender, MouseButtonEventArgs e)
     {
         previewPolyElem = null;
@@ -143,6 +150,9 @@ public partial class MainWindow : Window
     {
         DrawingArea.Children.Remove(previewPolyElem);
         isDrawing = false;
+        SaveState();
+        SaveShapeToFile(previewElem, "shapes.json");
+
     }
 
     private void ProcessRender(object sender, MouseEventArgs e)
@@ -218,74 +228,15 @@ public partial class MainWindow : Window
 
         MainShape shape = ShapeFactory.CreateShape(shapeName, constructorParams);
 
+        
+
         return shape.Render(DrawingArea, FillColorBrush, pen);
-
-        /*
-        switch (currType)
-        {
-            case ShapeType.stLine:
-                var line = new Line(d1, d2);
-                return line.Render(DrawingArea, FillColorBrush, pen);
-
-            case ShapeType.stRectangle:
-                var rect = new Rectangle(d1, d2);
-                return rect.Render(DrawingArea, FillColorBrush, pen);
-                
-            case ShapeType.stElipse:
-                var ellips = new Ellipse(d1, d2);
-                return ellips.Render(DrawingArea, FillColorBrush, pen);
-
-            case ShapeType.stPolyline:
-                DrawingArea.Children.Remove(previewPolyElem);
-                var line2 = new Line(d1, d2);
-                previewPolyElem = line2.Render(DrawingArea, FillColorBrush, pen);
-                var polyLine = new Polyline(CordList);
-                return polyLine.Render(DrawingArea, FillColorBrush, pen);
-            case ShapeType.stPolygon:
-                DrawingArea.Children.Remove(previewPolyElem);
-                var line3 = new Line(d1, d2);
-                previewPolyElem = line3.Render(DrawingArea, FillColorBrush, pen);
-                var polyg = new Polygon(CordList);
-                return polyg.Render(DrawingArea, FillColorBrush, pen);
-            
-            case ShapeType.stRegPolygon:
-                if (int.TryParse(tbSides.Text, out int sides) && sides >= 3)
-                {
-                }
-                else
-                {
-                    VertNum = 4;
-                    tbSides.Text = VertNum.ToString();
-                    MessageBox.Show("Количество сторон должно быть целым числом не меньше 3. Установлено значение по умолчанию: 4.");
-                }
-                var regPol = new RegularPolygon(d1, d2, VertNum);
-                return regPol.Render(DrawingArea, FillColorBrush, pen);
-           
-            default:
-                return null;
-
-        }
-        */
-    }
-
-    private void UndoDrawing(object sender, RoutedEventArgs e)
-    {
-        if (isDrawing) return;
-        DrawingArea.Children.Remove(previewElem);
-    }
-
-    private void RedoDrawing(object sender, RoutedEventArgs e)
-    {
-        if (isDrawing) return;
-        if (!DrawingArea.Children.Contains(previewElem))
-        {
-            DrawingArea.Children.Add(previewElem);
-        }
     }
 
     private void ClearDrawingArea(object sender, RoutedEventArgs e)
     {
         if (isDrawing) return;
+        SaveState();
         DrawingArea.Children.Clear();
    
     }
@@ -324,5 +275,109 @@ public partial class MainWindow : Window
                 VertNum = sides; 
             }
         }
+    }
+
+
+    private void SaveState()
+    {
+        var currentState = new List<UIElement>(DrawingArea.Children.Cast<UIElement>());
+        undoStack.Push(currentState);
+
+        redoStack.Clear();
+    }
+
+    private void UndoDrawing(object sender, RoutedEventArgs e)
+    {
+        if (isDrawing || undoStack.Count == 0) return;
+
+        if (redoStack.Count == 0) undoStack.Pop();
+
+        var currentState = new List<UIElement>(DrawingArea.Children.Cast<UIElement>());
+        redoStack.Push(currentState);
+
+   
+        var previousState = undoStack.Pop();
+        DrawingArea.Children.Clear();
+        foreach (var element in previousState)
+        {
+            DrawingArea.Children.Add(element);
+        }
+    }
+
+    private void RedoDrawing(object sender, RoutedEventArgs e)
+    {
+        if (isDrawing || redoStack.Count == 0) return;
+        
+        var currentState = new List<UIElement>(DrawingArea.Children.Cast<UIElement>());
+        undoStack.Push(currentState);
+        
+        var nextState = redoStack.Pop();
+        DrawingArea.Children.Clear();
+        foreach (var element in nextState)
+        {
+            DrawingArea.Children.Add(element);
+        }
+    }
+
+
+    private void SaveShapeToFile(System.Windows.Shapes.Shape shape, string filePath)
+    {
+      
+        var shapeData = new ShapeData
+        {
+            Type = shape.GetType().Name,
+            Points = CordList.Select(d => new Point(d.x, d.y)).ToList(),
+            StrokeThickness = shape.StrokeThickness,
+            StrokeColor = shape.Stroke.ToString(), 
+            FillColor = shape.Fill?.ToString() ?? "Transparent",
+            Vertices = VertNum
+        };
+
+        var shapesData = new List<ShapeData>();
+        if (File.Exists(filePath))
+        {
+            string existingJson = File.ReadAllText(filePath);
+            shapesData = JsonConvert.DeserializeObject<List<ShapeData>>(existingJson);
+        }
+        
+        shapesData.Add(shapeData);
+
+        string json = JsonConvert.SerializeObject(shapesData, Newtonsoft.Json.Formatting.Indented);
+        File.WriteAllText(filePath, json);
+    }
+
+    private void LoadShapesFromFile(string filePath)
+    {
+        if (!File.Exists(filePath)) return;
+
+        string json = File.ReadAllText(filePath);
+        var shapesData = JsonConvert.DeserializeObject<List<ShapeData>>(json);
+
+
+        DrawingArea.Children.Clear();
+
+        foreach (var shapeData in shapesData)
+        {
+            var pen = new Pen
+            {
+                Thickness = shapeData.StrokeThickness,
+                Brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(shapeData.StrokeColor))
+            };
+
+            var fillBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(shapeData.FillColor));
+
+           
+            MainShape shape = ShapeFactory.CreateShape(shapeData.Type, new object[] { shapeData.Points[0], shapeData.Points[1] });
+            if (shape != null)
+            {
+                var renderedShape = shape.Render(DrawingArea, fillBrush, pen);
+                DrawingArea.Children.Add(renderedShape);
+            }
+        }
+    }
+
+    private void btnLoad_Click(object sender, RoutedEventArgs e)
+    {
+        LoadShapesFromFile("shapes.json");
     }
 }

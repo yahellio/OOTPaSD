@@ -13,15 +13,15 @@ namespace graphicEditor
 {
     class Polyline : RectangleShape
     {
-        public Polyline(List<Dot> tDots)
+        public Polyline(List<Point> tDots)
         {
 
-            dots = tDots.Select(d => new Point(d.x, d.y)).ToList();
+            dots = tDots.Select(d => new Point(d.X, d.Y)).ToList();
 
-            TopLeft.x = tDots.Min(d => d.x);
-            BottomRight.x = tDots.Max(d => d.x);
-            TopLeft.y = tDots.Min(d => d.y);
-            BottomRight.y = tDots.Max(d => d.y);
+            TopLeft.X = tDots.Min(d => d.X);
+            BottomRight.X = tDots.Max(d => d.X);
+            TopLeft.Y = tDots.Min(d => d.Y);
+            BottomRight.Y = tDots.Max(d => d.Y);
 
         }
 

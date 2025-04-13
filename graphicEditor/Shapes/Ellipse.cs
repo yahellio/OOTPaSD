@@ -6,33 +6,34 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows;
 
 namespace graphicEditor
 {
     class Ellipse : RectangleShape
     {
-        public Ellipse(Dot d1, Dot d2)
+        public Ellipse(Point d1, Point d2)
         {
-            if (d1.x > d2.x)
+            if (d1.X > d2.X)
             {
-                this.TopLeft.x = d2.x;
-                this.BottomRight.x = d1.x;
+                this.TopLeft.X = d2.X;
+                this.BottomRight.X = d1.X;
             }
             else
             {
-                this.TopLeft.x = d1.x;
-                this.BottomRight.x = d2.x;
+                this.TopLeft.X = d1.X;
+                this.BottomRight.X = d2.X;
             }
 
-            if (d1.y > d2.y)
+            if (d1.Y > d2.Y) 
             {
-                this.TopLeft.y = d2.y;
-                this.BottomRight.y = d1.y;
+                this.TopLeft.Y = d2.Y;
+                this.BottomRight.Y = d1.Y;
             }
             else
             {
-                this.TopLeft.y = d1.y;
-                this.BottomRight.y = d2.y;
+                this.TopLeft.Y = d1.Y;
+                this.BottomRight.Y = d2.Y;
             }
         }
 
@@ -45,8 +46,8 @@ namespace graphicEditor
         {
             var ecl = new System.Windows.Shapes.Ellipse();
 
-            ecl.Width = Math.Abs(TopLeft.x - BottomRight.x);
-            ecl.Height = Math.Abs(TopLeft.y - BottomRight.y);
+            ecl.Width = Math.Abs(TopLeft.X - BottomRight.X);
+            ecl.Height = Math.Abs(TopLeft.Y - BottomRight.Y);
 
             ecl.Stroke = _frame.Brush;
             ecl.StrokeThickness = _frame.Thickness;
@@ -61,8 +62,8 @@ namespace graphicEditor
                 };
                 parent.RaiseEvent(newEvent);
             };
-            Canvas.SetLeft(ecl, TopLeft.x);
-            Canvas.SetTop(ecl, TopLeft.y);
+            Canvas.SetLeft(ecl, TopLeft.X);
+            Canvas.SetTop(ecl, TopLeft.Y);
             canvas.Children.Add(ecl);
 
             return ecl;

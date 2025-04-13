@@ -12,9 +12,17 @@ namespace graphicEditor.Undo_redo
     {
         private Stack<List<UIElement>> undoStack = new Stack<List<UIElement>>();
         private Stack<List<UIElement>> redoStack = new Stack<List<UIElement>>();
+        private List<UIElement> curState = null;
 
         public void SaveState(Canvas DrawingArea)
         {
+            //save current state if undo/redo have been used
+            if (curState != null)
+            {
+                undoStack.Push(curState);
+                curState = null;
+            }
+
             var currentState = new List<UIElement>(DrawingArea.Children.Cast<UIElement>());
             undoStack.Push(currentState);
 
@@ -33,6 +41,7 @@ namespace graphicEditor.Undo_redo
 
 
             var previousState = undoStack.Pop();
+            curState = previousState;
             DrawingArea.Children.Clear();
             foreach (var element in previousState)
             {
@@ -50,12 +59,12 @@ namespace graphicEditor.Undo_redo
             undoStack.Push(currentState);
 
             var nextState = redoStack.Pop();
-
-            //т.к. после последнего redo текущее состояние никуда не сохранялось и пропадало
+            curState = nextState;
+            /*т.к. после последнего redo текущее состояние никуда не сохранялось и пропадало
             if(redoStack.Count == 0)
             {
                 undoStack.Push(nextState);
-            }
+            }*/
 
             DrawingArea.Children.Clear();
             foreach (var element in nextState)

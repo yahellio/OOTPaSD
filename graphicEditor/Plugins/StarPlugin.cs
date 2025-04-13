@@ -12,7 +12,7 @@ namespace graphicEditor.Shapes
 {
     class StarPolygon : RoundShape
     {
-        protected Dot StartDot;
+        protected Point StartDot;
         public override System.Windows.Shapes.Shape Render(Canvas canvas)
         {
             return Render(canvas, this.Fill, this.Frame);
@@ -37,15 +37,15 @@ namespace graphicEditor.Shapes
                 parent.RaiseEvent(newEvent);
             };
 
-            double dx = StartDot.x - Center.x;
-            double dy = StartDot.y - Center.y;
+            double dx = StartDot.X - Center.X;
+            double dy = StartDot.Y - Center.Y;
             double startAngle = Math.Atan2(dy, dx);
 
             for (int i = 0; i < 5; i++)
             {
                 double angle = startAngle + 2 * Math.PI * i / 5 - Math.PI / 2;
-                double x = Center.x + Radius * Math.Cos(angle);
-                double y = Center.y + Radius * Math.Sin(angle);
+                double x = Center.X + Radius * Math.Cos(angle);
+                double y = Center.Y + Radius * Math.Sin(angle);
 
                 /*
                 x = Math.Max(0, Math.Min(canvas.ActualWidth, x));
@@ -61,10 +61,10 @@ namespace graphicEditor.Shapes
 
         }
 
-        public StarPolygon(Dot d1, Dot d2)
+        public StarPolygon(Point d1, Point d2)
         {
             Center = d1;
-            Radius = Dot.Distance(d1, d2);
+            Radius = d1.Distance(d2);
             StartDot = d2;
         }
     }

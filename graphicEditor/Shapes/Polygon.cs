@@ -14,14 +14,14 @@ namespace graphicEditor
 {
     class Polygon : RectangleShape
     {
-        public Polygon(List<Dot> tDots)
+        public Polygon(List<Point> tDots)
         {
-            dots = tDots.Select(d => new Point(d.x, d.y)).ToList();
+            dots = tDots;
 
-            TopLeft.x = tDots.Min(d => d.x);
-            BottomRight.x = tDots.Max(d => d.x);
-            TopLeft.y = tDots.Min(d => d.y);
-            BottomRight.y = tDots.Max(d => d.y);
+            TopLeft.X = tDots.Min(d => d.X);
+            BottomRight.X = tDots.Max(d => d.X);
+            TopLeft.Y = tDots.Min(d => d.Y);
+            BottomRight.Y = tDots.Max(d => d.Y);
         }
 
         protected List<Point> dots;

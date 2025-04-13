@@ -9,12 +9,13 @@ using System.Windows.Input;
 using System.Windows.Markup.Localizer;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows;
 
 namespace graphicEditor
 {
     public class Line : RectangleShape
     {
-        public Line(Dot d1, Dot d2) {
+        public Line(Point d1, Point d2) {
             this.TopLeft = d1;
             this.BottomRight = d2;
         }
@@ -28,10 +29,10 @@ namespace graphicEditor
         {
             System.Windows.Shapes.Line line = new System.Windows.Shapes.Line();
                 
-            line.X1 = this.TopLeft.x;
-            line.Y1 = this.TopLeft.y;
-            line.X2 = this.BottomRight.x;
-            line.Y2 = this.BottomRight.y;
+            line.X1 = this.TopLeft.X;
+            line.Y1 = this.TopLeft.Y;
+            line.X2 = this.BottomRight.X;
+            line.Y2 = this.BottomRight.Y;
 
             line.Stroke = _frame.Brush;
             line.StrokeThickness = _frame.Thickness;

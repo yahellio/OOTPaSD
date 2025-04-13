@@ -31,7 +31,7 @@ public partial class MainWindow : Window
     //Shapes
     Type currType;
 
-    List<Dot> CordList;
+    List<Point> CordList;
 
     Double StrokeThickness;
     Brush StrokeColorBrush;
@@ -139,13 +139,30 @@ public partial class MainWindow : Window
 
     private void StartPaint(object sender, MouseButtonEventArgs e)
     {
+        if (currType == typeof(RegularPolygon))
+        {
+
+            if (int.TryParse(tbSides.Text, out int sides) && sides >= 3)
+            {
+                VertNum = sides;
+            }
+            else
+            {
+                VertNum = 4;
+                tbSides.Text = VertNum.ToString();
+                MessageBox.Show("Количество сторон должно быть целым числом не меньше 3. Установлено значение по умолчанию: 4.");
+                return;
+            }
+
+        }
+
         previewPolyElem = null;
         isDrawing = true;
         startPoint = e.GetPosition(DrawingArea);
 
-        Dot d1 = new Dot(startPoint);
+        Point d1 = startPoint;
 
-        CordList = new List<Dot>();
+        CordList = new List<Point>();
         CordList.Add(d1);
 
         previewElem = shapeRender(d1, d1);
@@ -166,8 +183,8 @@ public partial class MainWindow : Window
 
         DrawingArea.Children.Remove(previewElem);
 
-        Dot d1 = new Dot(startPoint);
-        Dot d2 = new Dot(e.GetPosition(DrawingArea));
+        Point d1 = startPoint;
+        Point d2 = e.GetPosition(DrawingArea);
 
         previewElem = shapeRender(d1, d2);
        
@@ -182,7 +199,7 @@ public partial class MainWindow : Window
         startPoint = e.GetPosition(DrawingArea);
 
  
-        Dot d = new Dot(startPoint);
+        Point d = startPoint;
         CordList.Add(d);
 
         ProcessRender(sender, e);
@@ -192,7 +209,7 @@ public partial class MainWindow : Window
 
 
 
-    private System.Windows.Shapes.Shape shapeRender(Dot d1, Dot d2)
+    private System.Windows.Shapes.Shape shapeRender(Point d1, Point d2)
     {
       
         var pen = new Pen() { Thickness = StrokeThickness, Brush = StrokeColorBrush }; 
@@ -209,7 +226,7 @@ public partial class MainWindow : Window
 
         for (int i = 0; i < parameters.Length; i++)
         {
-            if (parameters[i].ParameterType == typeof(Dot))
+            if (parameters[i].ParameterType == typeof(Point))
             {
                 constructorParams[i] = (i == 0) ? d1 : d2;
             }
@@ -218,7 +235,7 @@ public partial class MainWindow : Window
                 
                 constructorParams[i] = VertNum;
             }
-            else if (parameters[i].ParameterType == typeof(List<Dot>))
+            else if (parameters[i].ParameterType == typeof(List<Point>))
             {
                 DrawingArea.Children.Remove(previewPolyElem);
                 var line2 = new Line(d1, d2);
@@ -279,10 +296,7 @@ public partial class MainWindow : Window
             {
                 VertNum = sides;
             }
-            else
-            {
-                tbSides.Text = VertNum.ToString();
-            }
+
         }
     }
 

@@ -1,8 +1,9 @@
-﻿using System;
+﻿using graphicEditor.Factory;
+using System;
 using System.Linq;
 using System.Reflection;
 
-namespace graphicEditor
+namespace graphicEditor.Plugins
 {
     public static class PluginLoader
     {

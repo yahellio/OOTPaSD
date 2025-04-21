@@ -50,7 +50,6 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         undo_redo = new Undo_redo.Undo_redo();
-        undo_redo.SaveState(DrawingArea);
 
         ShapeFactory.RegisterShape("Line", typeof(Line));
         ShapeFactory.RegisterShape("Rectangle", typeof(Rectangle));
@@ -173,7 +172,7 @@ public partial class MainWindow : Window
     {
         DrawingArea.Children.Remove(previewPolyElem);
         isDrawing = false;
-        undo_redo.SaveState(DrawingArea);
+
 
     }
 
@@ -258,7 +257,7 @@ public partial class MainWindow : Window
     private void ClearDrawingArea(object sender, RoutedEventArgs e)
     {
         if (isDrawing) return;
-        undo_redo.SaveState(DrawingArea);
+     
         DrawingArea.Children.Clear();
    
     }
@@ -303,12 +302,12 @@ public partial class MainWindow : Window
 
     private void UndoDrawing(object sender, RoutedEventArgs e)
     {
-        DrawingArea = undo_redo.Undo(DrawingArea, isDrawing);
+        //DrawingArea = undo_redo.Undo(DrawingArea, isDrawing);
     }
 
     private void RedoDrawing(object sender, RoutedEventArgs e)
     {
-        DrawingArea = undo_redo.Redo(DrawingArea, isDrawing);
+        //DrawingArea = undo_redo.Redo(DrawingArea, isDrawing);
     }
 
 }

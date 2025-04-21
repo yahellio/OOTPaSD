@@ -10,32 +10,44 @@ using System.Runtime.Serialization.Formatters;
 using System.Windows.Shapes;
 namespace graphicEditor.Undo_redo
 {
-    class Undo_redo
+    public class Undo_redo
     {
-        private Stack<List<UIElement>> curStack = new Stack<List<UIElement>>();
-        private Stack<List<UIElement>> redoStack = new Stack<List<UIElement>>();
+        private Stack<UIElement> curStack = new();
+        private Stack<UIElement> redoStack = new();
 
-        public void Undo()
+        public void AddAction(UIElement element)
+        {
+            curStack.Push(element);
+            redoStack.Clear(); 
+        }
+
+        public void Undo(Canvas canvas)
         {
             if (curStack.Count > 0)
             {
-                redoStack.Push(curStack.Pop());
+                UIElement element = curStack.Pop();
+                canvas.Children.Remove(element);
+                redoStack.Push(element);
             }
         }
 
-        public void Redo()
+        public void Redo(Canvas canvas)
         {
             if (redoStack.Count > 0)
             {
-                curStack.Push(redoStack.Pop());
+                UIElement element = redoStack.Pop();
+                canvas.Children.Add(element);
+                curStack.Push(element);
+
             }
         }
 
-        public void Clear()
+        public void Reset()
         {
             curStack.Clear();
             redoStack.Clear();
         }
-
     }
+
+
 }

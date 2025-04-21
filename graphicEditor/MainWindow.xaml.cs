@@ -173,7 +173,11 @@ public partial class MainWindow : Window
         DrawingArea.Children.Remove(previewPolyElem);
         isDrawing = false;
 
-
+        if (DrawingArea.Children.Count > 0)
+        {
+            var lastElement = DrawingArea.Children[DrawingArea.Children.Count - 1];
+            undo_redo.AddAction(lastElement);
+        }
     }
 
     private void ProcessRender(object sender, MouseEventArgs e)
@@ -259,7 +263,7 @@ public partial class MainWindow : Window
         if (isDrawing) return;
      
         DrawingArea.Children.Clear();
-   
+        undo_redo.Reset();
     }
 
     private void ShapeSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -302,12 +306,16 @@ public partial class MainWindow : Window
 
     private void UndoDrawing(object sender, RoutedEventArgs e)
     {
-        //DrawingArea = undo_redo.Undo(DrawingArea, isDrawing);
+        if (isDrawing) return;
+        undo_redo.Undo(DrawingArea);
     }
 
     private void RedoDrawing(object sender, RoutedEventArgs e)
     {
-        //DrawingArea = undo_redo.Redo(DrawingArea, isDrawing);
+        if (isDrawing) return;
+        undo_redo.Redo(DrawingArea);
     }
+
+
 
 }

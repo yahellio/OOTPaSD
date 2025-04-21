@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace graphicEditor.Factory
 {
@@ -45,5 +46,33 @@ namespace graphicEditor.Factory
         {
             return shapeTypes.ContainsKey(shapeName);
         }
+
+        public static bool IsPolygon(string shapeName)
+        {
+            if (shapeTypes.ContainsKey(shapeName))
+            {
+                Type type = shapeTypes[shapeName];
+
+                var constructor = type.GetConstructors().FirstOrDefault();
+
+                if (constructor != null)
+                {
+                    var parameters = constructor.GetParameters();
+
+                    object[] defaultParams = parameters.Select(p => (object)(
+                    p.ParameterType == typeof(Point) ? new Point(0, 0) :
+                    p.ParameterType == typeof(List<Point>) ? new List<Point> { new Point(0, 0), new Point(1, 1), new Point(2, 2) } :
+                    p.ParameterType == typeof(int) ? 3 :
+                    null
+                )).ToArray();
+
+                    var instance = (MainShape)constructor.Invoke(defaultParams);
+                    return instance.IsPoly;
+                }
+            }
+
+            throw new ArgumentException($"Shape '{shapeName}' is not registered or does not have a suitable constructor.");
+        }
+
     }
 }

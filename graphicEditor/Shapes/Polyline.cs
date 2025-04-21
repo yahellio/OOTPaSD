@@ -25,6 +25,8 @@ namespace graphicEditor
 
         }
 
+        public override bool IsPoly => true;
+
         protected List<Point> dots;
         public override System.Windows.Shapes.Shape Render(Canvas canvas)
         {

@@ -35,7 +35,10 @@ namespace graphicEditor
                 this.TopLeft.Y = d1.Y;
                 this.BottomRight.Y = d2.Y;
             }
+
         }
+
+        public override bool IsPoly => false;
 
         public override System.Windows.Shapes.Shape Render(Canvas canvas)
         {

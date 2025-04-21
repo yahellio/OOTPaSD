@@ -22,6 +22,8 @@ namespace graphicEditor.Shapes
             StartDot = d2;
         }
 
+        public override bool IsPoly => false;
+
         public override System.Windows.Shapes.Shape Render(Canvas canvas)
         {
             return Render(canvas, this.Fill, this.Frame);

@@ -18,7 +18,10 @@ namespace graphicEditor
         public Line(Point d1, Point d2) {
             this.TopLeft = d1;
             this.BottomRight = d2;
+
         }
+
+        public override bool IsPoly => false;
 
         public override System.Windows.Shapes.Shape Render(Canvas canvas)
         {

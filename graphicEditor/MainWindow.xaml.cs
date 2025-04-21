@@ -196,7 +196,7 @@ public partial class MainWindow : Window
     
     private void PolyClickPaint(object sender, MouseButtonEventArgs e)
     {
-        if (!isDrawing || ((currType != typeof(Polygon)) && (currType != typeof(Polyline)))) return;
+        if (!isDrawing || !ShapeFactory.IsPolygon(currType.Name)) return;
 
 
         startPoint = e.GetPosition(DrawingArea);

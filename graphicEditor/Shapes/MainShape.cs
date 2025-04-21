@@ -13,6 +13,8 @@ namespace graphicEditor
         protected Pen frame; //color and thickness
         protected Brush fill; //fill color
 
+        public abstract bool IsPoly { get; }
+
         public Pen Frame
         {
             get

@@ -66,6 +66,9 @@ namespace graphicEditor.Shapes
             Center = d1;
             Radius = d1.Distance(d2);
             StartDot = d2;
+
         }
+
+        public override bool IsPoly => false;
     }
 }

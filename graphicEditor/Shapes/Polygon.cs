@@ -24,6 +24,8 @@ namespace graphicEditor
             BottomRight.Y = tDots.Max(d => d.Y);
         }
 
+        public override bool IsPoly => true;
+
         protected List<Point> dots;
         public override System.Windows.Shapes.Shape Render(Canvas canvas)
         {

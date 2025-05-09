@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,13 +21,26 @@ namespace graphicEditor.Factory
             if (shapeTypes.ContainsKey(shapeName))
             {
                 Type type = shapeTypes[shapeName];
-
                 var constructor = type.GetConstructors().FirstOrDefault();
 
-                return (MainShape)constructor.Invoke(parameters);
+                if (constructor != null)
+                    return (MainShape)constructor.Invoke(parameters.Length > 0 ? parameters : GetDefaultParameters(constructor));
             }
             throw new ArgumentException($"Shape '{shapeName}' is not registered.");
         }
+
+        private static object[] GetDefaultParameters(ConstructorInfo constructor)
+        {
+            return constructor.GetParameters().Select(p =>
+                (object)(
+                    p.ParameterType == typeof(Point) ? new Point(0, 0) :
+                    p.ParameterType == typeof(List<Point>) ? new List<Point> { new Point(0, 0), new Point(1, 1), new Point(2, 2) } :
+                    p.ParameterType == typeof(int) ? 3 :
+                    null
+                )
+            ).ToArray();
+        }
+
 
         public static Type GetType(string shapeName)
         {
@@ -57,14 +71,7 @@ namespace graphicEditor.Factory
 
                 if (constructor != null)
                 {
-                    var parameters = constructor.GetParameters();
-
-                    object[] defaultParams = parameters.Select(p => (object)(
-                    p.ParameterType == typeof(Point) ? new Point(0, 0) :
-                    p.ParameterType == typeof(List<Point>) ? new List<Point> { new Point(0, 0), new Point(1, 1), new Point(2, 2) } :
-                    p.ParameterType == typeof(int) ? 3 :
-                    null
-                )).ToArray();
+                    object[] defaultParams = GetDefaultParameters(constructor);
 
                     var instance = (MainShape)constructor.Invoke(defaultParams);
                     return instance.IsPoly;
@@ -73,6 +80,7 @@ namespace graphicEditor.Factory
 
             throw new ArgumentException($"Shape '{shapeName}' is not registered or does not have a suitable constructor.");
         }
+
 
     }
 }

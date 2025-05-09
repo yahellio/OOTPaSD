@@ -1,0 +1,60 @@
+﻿using graphicEditor.Factory;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows;
+using System.IO;
+using System.Windows.Media;
+
+namespace graphicEditor.ConvertJson
+{
+    public static class ShapeSerializer
+    {
+        public static void Save(List<MainShape> shapes, string path)
+        {
+            var serializable = shapes
+                .Where(s => s is IShapeSerializable)
+                .Cast<IShapeSerializable>()
+                .Select(s => s.ToDTO())
+                .ToList();
+
+            File.WriteAllText(path, JsonConvert.SerializeObject(serializable, Formatting.Indented));
+        }
+
+        public static void Load(Canvas canvas, string path, List<MainShape> logicalShapes)
+        {
+            if (!File.Exists(path)) return;
+
+            canvas.Children.Clear();
+            logicalShapes.Clear();
+
+            var json = File.ReadAllText(path);
+            var dtos = JsonConvert.DeserializeObject<List<ShapeDTO>>(json);
+
+            if (dtos == null) return;
+
+            foreach (var dto in dtos)
+            {
+                if (!ShapeFactory.IsShapeRegistered(dto.ShapeType))
+                    continue;
+
+                var shape = ShapeFactory.CreateShape(dto.ShapeType);
+
+                if (shape is IShapeSerializable serializable)
+                {
+                    serializable.FromDTO(dto);
+                }
+
+                logicalShapes.Add(shape);
+
+                // Рендерим фигуру (цвета и толщина уже заданы внутри объекта, если нужно — добавь отдельные поля в Data)
+                shape.Render(canvas);
+            }
+        }
+
+    }
+}

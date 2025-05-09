@@ -23,8 +23,8 @@
             <!-- Кнопки действий -->
             <Button Name="btnUndo" Content="Undo" Width="60" Click="UndoDrawing" />
             <Button Name="btnRedo" Content="Redo" Width="60" Click="RedoDrawing"/>
-            <Button Name="btnSave" Content="Save" Width="60" />
-            <Button Name="btnLoad" Content="Load" Width="60" />
+            <Button Name="btnSave" Content="Save" Width="60" Click="SaveToFile"/>
+            <Button Name="btnLoad" Content="Load" Width="60" Click="LoadFromFile"/>
             <Button Name="btnClear" Content="Clear" Width="60" Click="ClearDrawingArea" />
 
             <!-- Выбор цвета обводки -->

@@ -16,6 +16,7 @@ using System.IO;
 using graphicEditor.Plugins;
 using graphicEditor.Factory;
 using graphicEditor.Undo_redo;
+using Microsoft.Win32;
 
 namespace graphicEditor;
 
@@ -27,6 +28,9 @@ public partial class MainWindow : Window
     bool isDrawing;
     Point startPoint;
     int VertNum;
+
+    private List<MainShape> logicalShapes = new();
+    MainShape lastShape;
 
     //Shapes
     Type currType;
@@ -177,6 +181,7 @@ public partial class MainWindow : Window
         {
             var lastElement = DrawingArea.Children[DrawingArea.Children.Count - 1];
             undo_redo.AddAction(lastElement);
+            logicalShapes.Add(lastShape);
         }
     }
 
@@ -252,8 +257,7 @@ public partial class MainWindow : Window
         }
 
         MainShape shape = ShapeFactory.CreateShape(shapeName, constructorParams);
-
-        
+        lastShape = shape;
 
         return shape.Render(DrawingArea, FillColorBrush, pen);
     }
@@ -316,6 +320,53 @@ public partial class MainWindow : Window
         undo_redo.Redo(DrawingArea);
     }
 
+    private void SaveToFile(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog
+        {
+            Filter = "JSON Files (*.json)|*.json",
+            DefaultExt = ".json",
+            Title = "Сохранить проект"
+        };
 
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                ConvertJson.ShapeSerializer.Save(logicalShapes, dialog.FileName);
+                MessageBox.Show("Файл успешно сохранён!", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при сохранении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private void LoadFromFile(object sender, RoutedEventArgs e)
+    {
+        if (isDrawing) return;
+
+        var dialog = new OpenFileDialog
+        {
+            Filter = "JSON Files (*.json)|*.json",
+            DefaultExt = ".json",
+            Title = "Открыть проект"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            try
+            {
+                ConvertJson.ShapeSerializer.Load(DrawingArea, dialog.FileName, logicalShapes);
+                undo_redo.Reset(); // сброс стека отмен
+                MessageBox.Show("Файл успешно загружен!", "Загрузка", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при загрузке: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
 
 }

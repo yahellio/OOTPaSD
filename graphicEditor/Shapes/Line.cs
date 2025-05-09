@@ -10,10 +10,12 @@ using System.Windows.Markup.Localizer;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
+using Newtonsoft.Json;
+using graphicEditor.ConvertJson;
 
 namespace graphicEditor
 {
-    public class Line : RectangleShape
+    public class Line : RectangleShape, IShapeSerializable
     {
         public Line(Point d1, Point d2) {
             this.TopLeft = d1;
@@ -31,7 +33,10 @@ namespace graphicEditor
         public override System.Windows.Shapes.Shape Render(Canvas canvas, Brush _fill, Pen _frame)
         {
             System.Windows.Shapes.Line line = new System.Windows.Shapes.Line();
-                
+            
+            this.fill = _fill;
+            this.frame = _frame;
+
             line.X1 = this.TopLeft.X;
             line.Y1 = this.TopLeft.Y;
             line.X2 = this.BottomRight.X;
@@ -63,6 +68,41 @@ namespace graphicEditor
 
             canvas.Children.Add(line);
             return line;
+        }
+        public ShapeDTO ToDTO()
+        {
+            return new ShapeDTO
+            {
+                ShapeType = nameof(Line),
+                Data = new Dictionary<string, object>
+                {
+                    { "X1", TopLeft.X },
+                    { "Y1", TopLeft.Y },
+                    { "X2", BottomRight.X },
+                    { "Y2", BottomRight.Y },
+                    { "Fill", Fill.ToString() },
+                    { "Stroke", Frame.Brush.ToString() },
+                    { "Thickness", Frame.Thickness }
+                }
+            };
+        }
+
+        public void FromDTO(ShapeDTO dto)
+        {
+            double x1 = Convert.ToDouble(dto.Data["X1"]);
+            double y1 = Convert.ToDouble(dto.Data["Y1"]);
+            double x2 = Convert.ToDouble(dto.Data["X2"]);
+            double y2 = Convert.ToDouble(dto.Data["Y2"]);
+
+            this.TopLeft = new Point(x1, y1);
+            this.BottomRight = new Point(x2, y2);
+
+            string fillStr = dto.Data.ContainsKey("Fill") ? dto.Data["Fill"].ToString() : "#00000000";
+            string strokeStr = dto.Data.ContainsKey("Stroke") ? dto.Data["Stroke"].ToString() : "#FF000000";
+            double thickness = dto.Data.ContainsKey("Thickness") ? Convert.ToDouble(dto.Data["Thickness"]) : 1.0;
+
+            this.Fill = (Brush)new BrushConverter().ConvertFromString(fillStr);
+            this.Frame = new Pen((Brush)new BrushConverter().ConvertFromString(strokeStr), thickness);
         }
     }
 }

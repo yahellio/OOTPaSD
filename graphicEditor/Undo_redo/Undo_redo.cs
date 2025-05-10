@@ -12,10 +12,10 @@ namespace graphicEditor.Undo_redo
 {
     public class Undo_redo
     {
-        private Stack<UIElement> curStack = new();
-        private Stack<UIElement> redoStack = new();
+        public Stack<MainShape> curStack = new();
+        private Stack<MainShape> redoStack = new();
 
-        public void AddAction(UIElement element)
+        public void AddAction(MainShape element)
         {
             curStack.Push(element);
             redoStack.Clear(); 
@@ -25,8 +25,10 @@ namespace graphicEditor.Undo_redo
         {
             if (curStack.Count > 0)
             {
-                UIElement element = curStack.Pop();
-                canvas.Children.Remove(element);
+                MainShape element = curStack.Pop();
+
+                canvas.Children.Remove(element.RenderedElement);
+
                 redoStack.Push(element);
             }
         }
@@ -35,8 +37,10 @@ namespace graphicEditor.Undo_redo
         {
             if (redoStack.Count > 0)
             {
-                UIElement element = redoStack.Pop();
-                canvas.Children.Add(element);
+                MainShape element = redoStack.Pop();
+
+                canvas.Children.Add(element.RenderedElement);
+
                 curStack.Push(element);
 
             }

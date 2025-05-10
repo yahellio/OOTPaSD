@@ -29,7 +29,6 @@ public partial class MainWindow : Window
     Point startPoint;
     int VertNum;
 
-    private List<MainShape> logicalShapes = new();
     MainShape lastShape;
 
     //Shapes
@@ -179,9 +178,7 @@ public partial class MainWindow : Window
 
         if (DrawingArea.Children.Count > 0)
         {
-            var lastElement = DrawingArea.Children[DrawingArea.Children.Count - 1];
-            undo_redo.AddAction(lastElement);
-            logicalShapes.Add(lastShape);
+            undo_redo.AddAction(lastShape);
         }
     }
 
@@ -257,9 +254,10 @@ public partial class MainWindow : Window
         }
 
         MainShape shape = ShapeFactory.CreateShape(shapeName, constructorParams);
+        System.Windows.Shapes.Shape rendShape = shape.Render(DrawingArea, FillColorBrush, pen);
         lastShape = shape;
 
-        return shape.Render(DrawingArea, FillColorBrush, pen);
+        return rendShape;
     }
 
     private void ClearDrawingArea(object sender, RoutedEventArgs e)
@@ -333,7 +331,7 @@ public partial class MainWindow : Window
         {
             try
             {
-                ConvertJson.ShapeSerializer.Save(logicalShapes, dialog.FileName);
+                ConvertJson.ShapeSerializer.Save(undo_redo.curStack.ToList(), dialog.FileName);
                 MessageBox.Show("Файл успешно сохранён!", "Сохранение", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -358,8 +356,8 @@ public partial class MainWindow : Window
         {
             try
             {
-                ConvertJson.ShapeSerializer.Load(DrawingArea, dialog.FileName, logicalShapes);
-                undo_redo.Reset(); // сброс стека отмен
+                undo_redo.Reset();
+                ConvertJson.ShapeSerializer.Load(DrawingArea, dialog.FileName, undo_redo.curStack);
                 MessageBox.Show("Файл успешно загружен!", "Загрузка", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)

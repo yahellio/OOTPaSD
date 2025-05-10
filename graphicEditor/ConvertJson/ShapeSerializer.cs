@@ -25,12 +25,11 @@ namespace graphicEditor.ConvertJson
             File.WriteAllText(path, JsonConvert.SerializeObject(serializable, Formatting.Indented));
         }
 
-        public static void Load(Canvas canvas, string path, List<MainShape> logicalShapes)
+        public static void Load(Canvas canvas, string path, Stack<MainShape> logicalShapes)
         {
             if (!File.Exists(path)) return;
 
             canvas.Children.Clear();
-            logicalShapes.Clear();
 
             var json = File.ReadAllText(path);
             var dtos = JsonConvert.DeserializeObject<List<ShapeDTO>>(json);
@@ -49,10 +48,9 @@ namespace graphicEditor.ConvertJson
                     serializable.FromDTO(dto);
                 }
 
-                logicalShapes.Add(shape);
-
-                // Рендерим фигуру (цвета и толщина уже заданы внутри объекта, если нужно — добавь отдельные поля в Data)
                 shape.Render(canvas);
+
+                logicalShapes.Push(shape);
             }
         }
 

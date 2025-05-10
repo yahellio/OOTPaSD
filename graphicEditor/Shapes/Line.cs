@@ -67,6 +67,7 @@ namespace graphicEditor
             };
 
             canvas.Children.Add(line);
+            RenderedElement = line;
             return line;
         }
         public ShapeDTO ToDTO()

@@ -7,10 +7,11 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows;
+using graphicEditor.ConvertJson;
 
 namespace graphicEditor.Shapes
 {
-    class RegularPolygon : RoundShape
+    class RegularPolygon : RoundShape, IShapeSerializable
     {
         protected int NumVert;
         protected Point StartDot;
@@ -32,6 +33,9 @@ namespace graphicEditor.Shapes
         public override System.Windows.Shapes.Shape Render(Canvas canvas, Brush _fill, Pen _frame)
         {   
             var polygon = new System.Windows.Shapes.Polygon();
+
+            this.fill = _fill;
+            this.frame = _frame;
 
             polygon.Stroke = _frame.Brush;
             polygon.StrokeThickness = _frame.Thickness;
@@ -68,8 +72,52 @@ namespace graphicEditor.Shapes
 
 
             canvas.Children.Add(polygon);
+            RenderedElement = polygon;
             return polygon;
 
         }
+
+        public ShapeDTO ToDTO()
+        {
+            return new ShapeDTO
+            {
+                ShapeType = nameof(RegularPolygon),
+                Data = new Dictionary<string, object>
+                {
+                { "CenterX", Center.X },
+                { "CenterY", Center.Y },
+                { "StartX", StartDot.X },
+                { "StartY", StartDot.Y },
+                { "NumVert", NumVert },
+                { "Fill", Fill.ToString() },
+                { "Stroke", Frame.Brush.ToString() },
+                { "Thickness", Frame.Thickness }
+                }
+            };
+        }
+
+
+        public void FromDTO(ShapeDTO dto)
+        {
+            double centerX = Convert.ToDouble(dto.Data["CenterX"]);
+            double centerY = Convert.ToDouble(dto.Data["CenterY"]);
+            double startX = Convert.ToDouble(dto.Data["StartX"]);
+            double startY = Convert.ToDouble(dto.Data["StartY"]);
+            int numVert = Convert.ToInt32(dto.Data["NumVert"]);
+
+            this.Center = new Point(centerX, centerY);
+            this.StartDot = new Point(startX, startY);
+            this.NumVert = numVert;
+            this.Radius = Center.Distance(StartDot);
+
+            string fillStr = dto.Data.ContainsKey("Fill") ? dto.Data["Fill"].ToString() : "#00000000";
+            string strokeStr = dto.Data.ContainsKey("Stroke") ? dto.Data["Stroke"].ToString() : "#FF000000";
+            double thickness = dto.Data.ContainsKey("Thickness") ? Convert.ToDouble(dto.Data["Thickness"]) : 1.0;
+
+            this.Fill = (Brush)new BrushConverter().ConvertFromString(fillStr);
+            this.Frame = new Pen((Brush)new BrushConverter().ConvertFromString(strokeStr), thickness);
+        }
+
+
     }
 }

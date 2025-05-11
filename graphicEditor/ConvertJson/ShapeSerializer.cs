@@ -36,8 +36,9 @@ namespace graphicEditor.ConvertJson
 
             if (dtos == null) return;
 
-            foreach (var dto in dtos)
+            for (int i = dtos.Count - 1; i >= 0; i--)
             {
+                var dto = dtos[i];
                 if (!ShapeFactory.IsShapeRegistered(dto.ShapeType))
                     continue;
 

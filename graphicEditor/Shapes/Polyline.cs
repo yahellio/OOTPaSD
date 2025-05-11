@@ -1,4 +1,6 @@
-﻿using System;
+﻿using graphicEditor.ConvertJson;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,11 +9,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 
 namespace graphicEditor
 {
-    class Polyline : RectangleShape
+    class Polyline : RectangleShape, IShapeSerializable
     {
         public Polyline(List<Point> tDots)
         {
@@ -37,6 +40,8 @@ namespace graphicEditor
         {
             var polyline = new System.Windows.Shapes.Polyline();
 
+            this.fill = _fill;
+            this.frame = _frame;
 
             polyline.Stroke = _frame.Brush;
             polyline.StrokeThickness = _frame.Thickness;
@@ -64,9 +69,58 @@ namespace graphicEditor
 
             polyline.Points = new PointCollection(dots);
             canvas.Children.Add(polyline);
+            RenderedElement = polyline;
 
             return polyline;
 
+        }
+
+        public ShapeDTO ToDTO()
+        {
+            return new ShapeDTO
+            {
+                ShapeType = nameof(Polyline),
+                Data = new Dictionary<string, object>
+                {
+                    { "Points", dots.Select(p => new Dictionary<string, double> { { "X", p.X }, { "Y", p.Y } }).ToList() },
+                    { "Fill", Fill.ToString() },
+                    { "Stroke", Frame.Brush.ToString() },
+                    { "Thickness", Frame.Thickness }
+                }
+            };
+        }
+
+        public void FromDTO(ShapeDTO dto)
+        {
+            if (dto.Data.TryGetValue("Points", out object rawPoints) && rawPoints is IEnumerable<object> pointObjs)
+            {
+                var loadedDots = new List<Point>();
+                foreach (var ptObj in pointObjs)
+                {
+                    var jObj = ptObj as JObject;
+                    if (jObj != null)
+                    {
+                        double x = jObj["X"].ToObject<double>();
+                        double y = jObj["Y"].ToObject<double>();
+                        loadedDots.Add(new Point(x, y));
+                    }
+                }
+
+                if (loadedDots.Count == 0)
+                    throw new Exception("Polyline must have at least one point.");
+
+                dots = loadedDots;
+
+                TopLeft = new Point(dots.Min(p => p.X), dots.Min(p => p.Y));
+                BottomRight = new Point(dots.Max(p => p.X), dots.Max(p => p.Y));
+            }
+
+            string fillStr = dto.Data.ContainsKey("Fill") ? dto.Data["Fill"].ToString() : "#00000000";
+            string strokeStr = dto.Data.ContainsKey("Stroke") ? dto.Data["Stroke"].ToString() : "#FF000000";
+            double thickness = dto.Data.ContainsKey("Thickness") ? Convert.ToDouble(dto.Data["Thickness"]) : 1.0;
+
+            this.Fill = (Brush)new BrushConverter().ConvertFromString(fillStr);
+            this.Frame = new Pen((Brush)new BrushConverter().ConvertFromString(strokeStr), thickness);
         }
 
     }

@@ -44,6 +44,9 @@ namespace graphicEditor.Factory
 
         public static Type GetType(string shapeName)
         {
+            if (shapeName == null)
+                throw new ArgumentNullException(nameof(shapeName));
+
             if (shapeTypes.ContainsKey(shapeName))
             {         
                 return shapeTypes[shapeName];

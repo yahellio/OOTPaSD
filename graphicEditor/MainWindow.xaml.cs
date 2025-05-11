@@ -63,7 +63,6 @@ public partial class MainWindow : Window
 
         PluginLoader.RegisterAllShapes();
 
-
         isDrawing = false;
         currType = typeof(Line);
 
@@ -102,10 +101,15 @@ public partial class MainWindow : Window
         cbShapes.Items.Clear();
 
         var shapes = ShapeFactory.GetRegisteredShapes();
-
+        
         foreach (var shapeName in shapes)
         {
             cbShapes.Items.Add(new ComboBoxItem { Content = shapeName });
+        }
+
+        if (cbShapes.Items.Count > 0)
+        {
+            cbShapes.SelectedIndex = 0;
         }
     }
 
@@ -271,6 +275,8 @@ public partial class MainWindow : Window
     private void ShapeSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         string shapeName = (cbShapes.SelectedItem as ComboBoxItem)?.Content.ToString();
+        if (string.IsNullOrEmpty(shapeName)) return;
+
         tbSides.Visibility = Visibility.Collapsed;
         currType = ShapeFactory.GetType(shapeName);
 
@@ -366,5 +372,22 @@ public partial class MainWindow : Window
             }
         }
     }
+
+    private void LoadPlugin_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "DLL Files (*.dll)|*.dll",
+            Title = "Выберите файл плагина"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            PluginLoader.LoadFromDll(dialog.FileName);
+            UpdateShapeComboBox();
+            MessageBox.Show("Плагин успешно загружен!");
+        }
+    }
+
 
 }

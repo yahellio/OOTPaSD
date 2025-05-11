@@ -21,6 +21,7 @@
             </StackPanel>
             <TextBox x:Name="tbSides" Width="50" Margin="5,0,0,0" Visibility="Collapsed" TextChanged="tbSides_TextChanged"/>
             <!-- Кнопки действий -->
+            <Button Name="btnPlug" Content="+" Width="30" Click="LoadPlugin_Click" />
             <Button Name="btnUndo" Content="Undo" Width="60" Click="UndoDrawing" />
             <Button Name="btnRedo" Content="Redo" Width="60" Click="RedoDrawing"/>
             <Button Name="btnSave" Content="Save" Width="60" Click="SaveToFile"/>

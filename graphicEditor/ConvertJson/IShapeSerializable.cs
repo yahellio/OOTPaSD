@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace graphicEditor.ConvertJson
 {
-    interface IShapeSerializable
+    public interface IShapeSerializable
     {
         ShapeDTO ToDTO();
         void FromDTO(ShapeDTO dto);
